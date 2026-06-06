@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Balık Eşleştirme Yapbozu</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0/default.css">
+  <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0/index.min.js"></script>
+
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ebf4ff; text-align: center; padding: 20px; margin: 0; }
+    h2 { color: #2b6cb0; margin-bottom: 5px; }
+    p { color: #4a5568; margin-bottom: 25px; }
+    
+    .oyun-alani { display: flex; justify-content: space-between; gap: 10px; }
+    .sutun { display: flex; flex-direction: column; gap: 15px; width: 48%; }
+    
+    /* Sürükleyeceğimiz Balık Resimleri */
+    .balik-karti { 
+      background: white; padding: 15px; border-radius: 12px; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 30px;
+      touch-action: none; /* Mobilde kaydırmayı engeller, sürüklemeyi kolaylaştırır */
+    }
+    
+    /* İsimlerin Yazdığı Hedef Kutular */
+    .hedef-kutu {
+      background: #cbd5e0; padding: 20px 5px; border-radius: 12px;
+      border: 2px dashed #718096; font-weight: bold; color: #4a5568;
+      min-height: 35px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+    .hedef-kutu.dogru { background: #48bb78; color: white; border-color: #2f855a; }
+    
+    .geri-butonu {
+      display: inline-block; margin-top: 40px; background: #4a5568; color: white;
+      padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Kimin Adı Ne?</h2>
+  <p>Balığı parmağınla tut ve doğru ismin üzerine bırak.</p>
+
+  <div class="oyun-alani">
+    <div class="sutun">
+      <div class="balik-karti" draggable="true" id="kopekbaligi">🦈</div>
+      <div class="balik-karti" draggable="true" id="palyaco">🐠</div>
+      <div class="balik-karti" draggable="true" id="mavitang">🐟</div>
+      <div class="balik-karti" draggable="true" id="vatoz">🛸 (Vatoz)</div>
+      <div class="balik-karti" draggable="true" id="denizati">🐎 (Denizatı)</div>
+    </div>
+
+    <div class="sutun">
+      <div class="hedef-kutu" data-hedef="palyaco">Palyaçobalığı</div>
+      <div class="hedef-kutu" data-hedef="denizati">Denizatı</div>
+      <div class="hedef-kutu" data-hedef="kopekbaligi">Köpekbalığı</div>
+      <div class="hedef-kutu" data-hedef="vatoz">Vatoz</div>
+      <div class="hedef-kutu" data-hedef="mavitang">Mavi Tang</div>
+    </div>
+  </div>
+
+  <a href="index.html" class="geri-butonu">⬅ AR Kamerasına Dön</a>
+
+  <script>
+    // Mobil desteği başlat
+    MobileDragDrop.polyfill({ holdToDrag: 100 }); 
+
+    const kartlar = document.querySelectorAll('.balik-karti');
+    const kutular = document.querySelectorAll('.hedef-kutu');
+
+    kartlar.forEach(kart => {
+      kart.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', kart.id);
+        setTimeout(() => kart.style.opacity = '0.4', 0);
+      });
+      kart.addEventListener('dragend', () => kart.style.opacity = '1');
+    });
+
+    kutular.forEach(kutu => {
+      kutu.addEventListener('dragover', (e) => e.preventDefault()); 
+      
+      kutu.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const suruklenenId = e.dataTransfer.getData('text/plain');
+        const hedefId = kutu.getAttribute('data-hedef');
+
+        if (suruklenenId === hedefId) {
+          const suruklenenEleman = document.getElementById(suruklenenId);
+          kutu.innerHTML = `✅ ${kutu.innerText} ${suruklenenEleman.innerText}`;
+          kutu.classList.add('dogru');
+          suruklenenEleman.style.visibility = 'hidden'; 
+        } else {
+          // Telefonda titreşim efekti (Destekleyen cihazlarda)
+          if(navigator.vibrate) navigator.vibrate(200);
+          alert("Ops! Yanlış balık, tekrar dene.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
